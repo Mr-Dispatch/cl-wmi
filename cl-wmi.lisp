@@ -110,18 +110,15 @@
   "Auto cast the container based off the type name returned from .NET"
   (cast container (get-type-name container)))
 
+
 (defun unbox-from-type-name (container)
   "Unbox the container based on the full type name. RDNZL doesn't handle UInts so we deal with those specially"
   (if (container-p container)      
       (let ((type [GetType container]))
 	(cast-from-type-name container)
-	(cond
-	  ([%IsArray type]
-	   (rdnzl-array-to-list container))
-	  ((member [%FullName type] '("System.UInt8" "System.UInt16" "System.UInt32" "System.UInt64") :test #'string=)
-	   (unbox (cast container "System.Int64")))
-	  (t 
-	   (unbox (cast-from-type-name container)))))
+	(if [%IsArray type]
+	  (rdnzl-array-to-list container)
+	  (unbox (cast-from-type-name container))))
       container))
     
 (defun object-property (obj name)
